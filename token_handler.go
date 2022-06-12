@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/google/uuid"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
@@ -40,8 +39,6 @@ func tokenHandler(dbClient *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		fmt.Printf("%s\n%s\n", refreshTkn.Uuid, accessTkn.Uuid)
-		fmt.Printf("%s\n%s\n", refreshTkn.TokenPairUuid, accessTkn.TokenPairUuid)
 		if refreshTkn.TokenPairUuid != accessTkn.TokenPairUuid {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "tokens were created separately",

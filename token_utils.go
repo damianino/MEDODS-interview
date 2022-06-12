@@ -18,7 +18,7 @@ type CustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-const ACCESS_TOKEN_TTL = time.Minute * 10
+const AccessTokenTtl = time.Minute * 10
 
 var accessKey = []byte(os.Getenv("ACCESS_KEY"))
 var refreshKey = []byte(os.Getenv("REFRESH_KEY"))
@@ -30,7 +30,7 @@ func generateAccessToken(user User, tokenPairUuid string) (string, error) {
 		TokenPairUuid: tokenPairUuid,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(ACCESS_TOKEN_TTL)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(AccessTokenTtl)),
 		},
 	})
 
