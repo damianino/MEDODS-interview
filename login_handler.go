@@ -31,7 +31,9 @@ func loginHandler(dbClient *mongo.Client) gin.HandlerFunc {
 
 		user := User{Uuid: userUuid}
 
-		accessToken, err := generateAccessToken(user)
+		tokenPairUuid := uuid.New().String()
+
+		accessToken, err := generateAccessToken(user, tokenPairUuid)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "error generating access token",
@@ -39,7 +41,7 @@ func loginHandler(dbClient *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		refreshToken, err := generateRefreshToken(user)
+		refreshToken, err := generateRefreshToken(user, tokenPairUuid)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "error generating refresh token",

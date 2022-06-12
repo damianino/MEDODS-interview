@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/google/uuid"
 	"net/http"
 	"time"
 
@@ -38,6 +40,15 @@ func tokenHandler(dbClient *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
+		fmt.Printf("%s\n%s\n", refreshTkn.Uuid, accessTkn.Uuid)
+		fmt.Printf("%s\n%s\n", refreshTkn.TokenPairUuid, accessTkn.TokenPairUuid)
+		if refreshTkn.TokenPairUuid != accessTkn.TokenPairUuid {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "tokens were created separately",
+			})
+			return
+		}
+
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		var res bson.M
@@ -58,7 +69,17 @@ func tokenHandler(dbClient *mongo.Client) gin.HandlerFunc {
 		}
 
 		user := User{Uuid: accessTkn.Uuid}
-		newAccessToken, err := generateAccessToken(user)
+
+		newUuid, err := uuid.NewUUID()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "error generating token pair uuid",
+			})
+			return
+		}
+		tokenPairUuid := uuid.UUID.String(newUuid)
+
+		newAccessToken, err := generateAccessToken(user, tokenPairUuid)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "error generating access token",
@@ -66,7 +87,7 @@ func tokenHandler(dbClient *mongo.Client) gin.HandlerFunc {
 			return
 		}
 
-		newRefreshToken, err := generateRefreshToken(user)
+		newRefreshToken, err := generateRefreshToken(user, tokenPairUuid)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "error generating refresh token",
