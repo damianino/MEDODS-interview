@@ -26,6 +26,7 @@ func loginHandler(dbClient *mongo.Client) gin.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		col := dbClient.Database("MEDODS-interview").Collection("users")
+		// Удаляет пердыдущий документ refresh токен, перед созданием нового, если такой был найден
 		col.FindOneAndDelete(ctx, bson.M{"uuid": userUuid})
 
 		user := User{Uuid: userUuid}

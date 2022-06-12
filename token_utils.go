@@ -79,10 +79,12 @@ func authorizeRefreshToken(tokenStr string) (*CustomClaims, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	tkn, ok := token.Claims.(*CustomClaims)
 	if !ok {
 		return nil, errors.New("bad claims")
 	}
+
 	if err = tkn.Valid(); err != nil {
 		return nil, err
 	}

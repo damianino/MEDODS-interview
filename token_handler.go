@@ -80,7 +80,14 @@ func tokenHandler(dbClient *mongo.Client) gin.HandlerFunc {
 			{Key: "token", Value: string(hash)},
 		}
 
-		col.FindOneAndDelete(ctx, bson.M{"uuid": accessTkn.Uuid})
+		// Если все проверки старых токенов и генерации новых успешно прошли, удалить старый документ со старым refresh токеном
+		r := col.FindOneAndDelete(ctx, bson.M{"uuid": accessTkn.Uuid})
+		if r.Err() != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "error deleting old refresh token",
+			})
+			return
+		}
 
 		_, err = col.InsertOne(ctx, doc)
 		if err != nil {
